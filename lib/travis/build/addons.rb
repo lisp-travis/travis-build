@@ -9,6 +9,7 @@ require 'travis/build/addons/firefox'
 require 'travis/build/addons/hosts'
 require 'travis/build/addons/postgresql'
 require 'travis/build/addons/sauce_connect'
+require 'travis/build/addons/jwt'
 require 'travis/build/addons/ssh_known_hosts'
 
 module Travis
