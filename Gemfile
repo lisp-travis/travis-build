@@ -5,6 +5,7 @@ ruby File.read(File.expand_path('../.ruby-version', __FILE__)).strip if ENV.key?
 gem 'travis-support',  github: 'travis-ci/travis-support'
 gem 'activesupport', '~> 4.0'
 gem 'addressable', '~> 2.3'
+gem 'jwt'
 
 gem 'sinatra', '~> 1.4'
 gem 'puma'
