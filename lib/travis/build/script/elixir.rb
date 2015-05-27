@@ -14,6 +14,9 @@ module Travis
 
         def announce
           super
+          sh.fold "kiex.selfupdate" do
+            sh.cmd "kiex selfupdate"
+          end
           sh.fold "kiex" do
             sh.cmd "kiex list | grep -F #{elixir_version} >/dev/null", echo: false
             sh.if "$? -eq 0" do
