@@ -20,10 +20,15 @@ module Travis
                          'Please either override the script: key ' +
                          'or use the system: key to set a test (asdf) system.'
 
+        def configure
+          sh.cmd 'sudo apt-get update'
+          sh.cmd 'sudo apt-get install libc6:i386 libc6-dev libc6-dev-i386 libffi-dev libffi-dev:i386'
+        end
+
         def export
           super
           sh.export 'CIM_HOME', CIM_HOME
-          sh.cmd "export PATH=$PATH:$CIM_HOME/bin"
+          sh.export 'PATH', "#{path}:$PATH"
         end
 
         def setup
