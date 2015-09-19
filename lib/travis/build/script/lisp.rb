@@ -20,13 +20,6 @@ module Travis
                          'system to test using the system key, or override the' +
                          'script key.'
 
-        TEST_COMMAND_MISSING = 'No test command or test script provided. ' +
-                               'Please either override the script: key ' +
-                               'or use the test_command: key to set a ' +
-                               'lisp command that runs the test and returns a ' +
-                               'boolean indicating if the test was successful or ' +
-                               'not.'
-
         def configure
           sh.cmd 'sudo apt-get update'
           sh.cmd 'sudo apt-get install libc6:i386 libc6-dev libc6-dev-i386 libffi-dev libffi-dev:i386'
@@ -47,18 +40,14 @@ module Travis
         end
 
         def script
-          if config.has_key?(:test_command) and config.has_key?(:system)
+          if config.has_key?(:system)
             system_keyword = ":" + config[:system]
-            test_form = "(handler-case #{config[:test_command]}) (t () nil))"
+            test_command = config.fetch(:test_command, "(asdf:test-system #{system_keyword})")
+            test_form = "(handler-case #{test_command}) (t () nil))"
             sh.cmd "cl -e '(ql:quickload #{system_keyword})' "\
                    "-e (unless #{test_form} (uiop:quit 1))"
           else
-            if not config.has_key?(:system)
-              sh.failure SYSTEM_MISSING
-            end
-            if not config.has_key?(:test_command)
-              sh.failure TEST_COMMAND_MISSING
-            end
+            sh.failure SYSTEM_MISSING
           end
         end
 
