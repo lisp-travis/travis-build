@@ -16,9 +16,16 @@ module Travis
         ASDF_CONF_DIR = "$HOME/.config/common-lisp/source-registry.d"
         ASDF_CONF_FILE = ASDF_CONF_DIR + "/travis.conf"
 
-        SYSTEM_MISSING = 'No test system or test script provided. ' +
-                         'Please either override the script: key ' +
-                         'or use the system: key to set a test (asdf) system.'
+        SYSTEM_MISSING = 'No test system was missing. Please either supply a ' +
+                         'system to test using the system key, or override the' +
+                         'script key.'
+
+        TEST_COMMAND_MISSING = 'No test command or test script provided. ' +
+                               'Please either override the script: key ' +
+                               'or use the test_command: key to set a ' +
+                               'lisp command that runs the test and returns a ' +
+                               'boolean indicating if the test was successful or ' +
+                               'not.'
 
         def configure
           sh.cmd 'sudo apt-get update'
@@ -40,13 +47,18 @@ module Travis
         end
 
         def script
-          if config.has_key?(:system)
+          if config.has_key?(:test_command) and config.has_key?(:system)
             system_keyword = ":" + config[:system]
+            test_form = "(handler-case #{config[:test_command]}) (t () nil))"
             sh.cmd "cl -e '(ql:quickload #{system_keyword})' "\
-                   "-e (unless (asdf:test-system #{system_keyword}) " +
-                   "(uiop:quit 1))"
+                   "-e (unless #{test_form} (uiop:quit 1))"
           else
-            sh.failure SYSTEM_MISSING
+            if not config.has_key?(:system)
+              sh.failure SYSTEM_MISSING
+            end
+            if not config.has_key?(:test_command)
+              sh.failure TEST_COMMAND_MISSING
+            end
           end
         end
 
