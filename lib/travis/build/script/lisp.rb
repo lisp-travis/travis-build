@@ -78,7 +78,7 @@ module Travis
           sh.echo "Installing quicklisp..."
           sh.cmd "curl -sL #{QL_URL}"
           sh.cmd 'cl -f quicklisp.lisp -e "(quicklisp-quickstart:install :path \"$CIM_HOME/quicklisp\")"'\
-                 ' -e "(ql:add-to-init-file)"'
+                 ' -e "(ql-util:without-prompting (ql:add-to-init-file))"'
         end
 
         def install_asdf
