@@ -29,6 +29,8 @@ module Travis
           Script::Cpp
         when 'objective-c', 'swift' then
           Script::ObjectiveC
+        when 'common-lisp', 'lisp' then
+          Script::CommonLisp
         when 'bash', 'sh', 'shell' then
           Script::Generic
         else

@@ -3,7 +3,7 @@ require 'tempfile'
 module Travis
   module Build
     class Script
-      class Lisp < Script
+      class CommonLisp < Script
         DEFAULTS = {
           lisp: 'sbcl'
         }
