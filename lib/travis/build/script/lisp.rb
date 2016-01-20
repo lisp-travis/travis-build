@@ -16,14 +16,19 @@ module Travis
         ASDF_CONF_DIR = "$HOME/.config/common-lisp/source-registry.d"
         ASDF_CONF_FILE = ASDF_CONF_DIR + "/travis.conf"
 
-        SYSTEM_MISSING = 'No test system or test script provided. ' +
-                         'Please either override the script: key ' +
-                         'or use the system: key to set a test (asdf) system.'
+        SYSTEM_MISSING = 'No test system was missing. Please either supply a ' +
+                         'system to test using the system key, or override the' +
+                         'script key.'
+
+        def configure
+          sh.cmd 'sudo apt-get update'
+          sh.cmd 'sudo apt-get install libc6:i386 libc6-dev libc6-dev-i386 libffi-dev libffi-dev:i386'
+        end
 
         def export
           super
           sh.export 'CIM_HOME', CIM_HOME
-          sh.cmd "export PATH=$PATH:$CIM_HOME/bin"
+          sh.export 'PATH', "#{path}:$PATH"
         end
 
         def setup
@@ -37,9 +42,10 @@ module Travis
         def script
           if config.has_key?(:system)
             system_keyword = ":" + config[:system]
+            test_command = config.fetch(:test_command, "(asdf:test-system #{system_keyword})")
+            test_form = "(handler-case #{test_command}) (t () nil))"
             sh.cmd "cl -e '(ql:quickload #{system_keyword})' "\
-                   "-e (unless (asdf:test-system #{system_keyword}) " +
-                   "(uiop:quit 1))"
+                   "-e (unless #{test_form} (uiop:quit 1))"
           else
             sh.failure SYSTEM_MISSING
           end
@@ -73,7 +79,7 @@ module Travis
           sh.echo "Installing quicklisp..."
           sh.cmd "curl -sL #{QL_URL}"
           sh.cmd 'cl -f quicklisp.lisp -e "(quicklisp-quickstart:install :path \"$CIM_HOME/quicklisp\")"'\
-                 ' -e "(ql:add-to-init-file)"'
+                 ' -e "(ql-util:without-prompting (ql:add-to-init-file))"'
         end
 
         def install_asdf
